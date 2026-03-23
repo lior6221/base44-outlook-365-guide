@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מדריך: חיבור Base44 לשליחת מיילים דרך Microsoft 365 | קישורי</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Rubik', sans-serif;
+      background: linear-gradient(145deg, #1a1030 0%, #120c22 40%, #1e1240 70%, #150e28 100%);
+      color: rgba(255,255,255,0.85);
+      line-height: 1.8;
+      min-height: 100vh;
+    }
+
+    .orb { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; }
+    .orb-1 {
+      top: -8%; right: 5%; width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(141, 105, 255, 0.50) 0%, rgba(107, 60, 230, 0.18) 55%, transparent 80%);
+      filter: blur(120px); animation: orb1 18s ease-in-out infinite;
+    }
+    .orb-2 {
+      bottom: -5%; left: -3%; width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(90, 45, 191, 0.40) 0%, rgba(141, 105, 255, 0.15) 55%, transparent 80%);
+      filter: blur(100px); animation: orb2 22s ease-in-out infinite 3s;
+    }
+    .orb-3 {
+      top: 30%; right: 15%; width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(200, 100, 255, 0.30) 0%, rgba(160, 80, 220, 0.08) 60%, transparent 80%);
+      filter: blur(110px); animation: orb3 15s ease-in-out infinite 5s;
+    }
+    @keyframes orb1 { 0%,100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.12); opacity: 0.7; } }
+    @keyframes orb2 { 0%,100% { transform: scale(1); opacity: 0.45; } 50% { transform: scale(1.08); opacity: 0.65; } }
+    @keyframes orb3 { 0%,100% { transform: scale(1); opacity: 0.4; } 50% { transform: scale(1.15); opacity: 0.6; } }
+
+    .header {
+      padding: 60px 20px 80px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    .header h1 {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 800;
+      color: rgba(255,255,255,0.95);
+      margin-bottom: 12px;
+    }
+    .header p {
+      font-size: 17px;
+      color: rgba(255,255,255,0.55);
+      max-width: 650px;
+      margin: 0 auto;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%);
+      backdrop-filter: blur(20px) saturate(1.4);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 24px;
+      box-shadow: inset 1px 1px 2px rgba(255,255,255,0.22), 0 2px 8px rgba(0,0,0,0.22);
+    }
+    .badge .dot {
+      width: 8px; height: 8px;
+      background: #4ade80;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    .badge a {
+      color: rgba(255,255,255,0.75);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .badge a:hover { color: rgba(255,255,255,0.95); }
+    .badge .fb-icon {
+      width: 14px; height: 14px;
+      display: inline-block;
+      opacity: 0.7;
+    }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    .content {
+      max-width: 800px;
+      margin: -40px auto 0;
+      padding: 0 20px 60px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 50%, rgba(200,180,255,0.04) 100%);
+      backdrop-filter: blur(40px) saturate(1.4);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow:
+        inset 1px 1px 2px rgba(255,255,255,0.22),
+        inset -1px -1px 0 rgba(255,255,255,0.04),
+        0 2px 8px rgba(0,0,0,0.22),
+        0 8px 32px rgba(0,0,0,0.20);
+    }
+    .card h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.95);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card h2 .num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px; height: 32px;
+      background: linear-gradient(to bottom right, #6d28d9, #1e1145);
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(124,92,252,0.3);
+    }
+    .card h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.75);
+      margin: 20px 0 8px;
+    }
+    .card p, .card li {
+      color: rgba(255,255,255,0.65);
+      font-size: 15px;
+    }
+    .card ul, .card ol { padding-right: 20px; margin: 8px 0; }
+    .card li { margin-bottom: 6px; }
+
+    pre {
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px;
+      padding: 20px;
+      overflow-x: auto;
+      margin: 16px 0;
+      direction: ltr;
+      text-align: left;
+    }
+    code {
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: rgba(196,181,253,0.9);
+    }
+    pre code { color: rgba(255,255,255,0.85); }
+
+    p code, li code, td code {
+      background: rgba(124,92,252,0.18);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: rgba(196,181,253,0.9);
+    }
+
+    .callout {
+      background: rgba(251,191,36,0.08);
+      border: 1px solid rgba(251,191,36,0.2);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 16px 0;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .callout .icon { font-size: 20px; flex-shrink: 0; }
+    .callout p { color: #fbbf24; font-size: 14px; margin: 0; }
+
+    .callout-danger {
+      background: rgba(239,68,68,0.08);
+      border-color: rgba(239,68,68,0.2);
+    }
+    .callout-danger p { color: rgba(252,165,165,0.9); }
+
+    .callout-success {
+      background: rgba(74,222,128,0.08);
+      border-color: rgba(74,222,128,0.2);
+    }
+    .callout-success p { color: rgba(134,239,172,0.9); }
+
+    .callout-info {
+      background: rgba(124,92,252,0.08);
+      border-color: rgba(124,92,252,0.2);
+    }
+    .callout-info p { color: rgba(196,181,253,0.9); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+    th {
+      background: rgba(124,92,252,0.15);
+      color: rgba(196,181,253,0.9);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 16px;
+      text-align: right;
+    }
+    td {
+      padding: 10px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 14px;
+      color: rgba(255,255,255,0.65);
+    }
+    tr:hover td { background: rgba(255,255,255,0.03); }
+
+    .img-placeholder {
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(124,92,252,0.2);
+      border-radius: 14px;
+      padding: 12px;
+      text-align: center;
+      margin: 16px 0;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      color: rgba(255,255,255,0.35);
+      font-size: 14px;
+    }
+    .img-placeholder:hover {
+      border-color: rgba(124,92,252,0.5);
+    }
+    .img-placeholder img {
+      max-width: 100%;
+      max-height: 300px;
+      object-fit: contain;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .img-placeholder .click-hint {
+      display: block;
+      margin-top: 8px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.25);
+    }
+
+    /* Lightbox */
+    .lightbox {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      cursor: zoom-out;
+    }
+    .lightbox.active { display: flex; }
+    .lightbox img {
+      max-width: 95vw;
+      max-height: 95vh;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 0 60px rgba(124,92,252,0.3);
+    }
+    .lightbox-close {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 40px; height: 40px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 50%;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+    .lightbox-close:hover { background: rgba(255,255,255,0.2); }
+
+    /* Copy button */
+    .copyable {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .copy-btn {
+      background: rgba(124,92,252,0.15);
+      border: 1px solid rgba(124,92,252,0.25);
+      color: rgba(196,181,253,0.8);
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-family: 'Rubik', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .copy-btn:hover {
+      background: rgba(124,92,252,0.3);
+      color: white;
+    }
+    .copy-btn.copied {
+      background: rgba(74,222,128,0.2);
+      border-color: rgba(74,222,128,0.3);
+      color: rgba(134,239,172,0.9);
+    }
+
+    .error-block {
+      background: rgba(239,68,68,0.06);
+      border: 1px solid rgba(239,68,68,0.15);
+      border-radius: 14px;
+      padding: 20px;
+      margin: 16px 0;
+      direction: ltr;
+      text-align: left;
+    }
+    .error-block code {
+      color: rgba(252,165,165,0.9);
+      font-size: 13px;
+    }
+
+    .summary-table { margin-top: 16px; }
+    .summary-table td:first-child {
+      font-weight: 600;
+      color: rgba(196,181,253,0.9);
+      white-space: nowrap;
+    }
+
+    .spf-breakdown td:first-child {
+      direction: ltr;
+      text-align: left;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: rgba(196,181,253,0.9);
+      white-space: nowrap;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 40px 20px 60px;
+      position: relative;
+      z-index: 1;
+    }
+    .footer p {
+      color: rgba(255,255,255,0.3);
+      font-size: 13px;
+    }
+    .footer a {
+      color: rgba(124,92,252,0.7);
+      text-decoration: none;
+    }
+    .footer a:hover { color: rgba(124,92,252,1); }
+    .footer-logo {
+      margin-bottom: 16px;
+    }
+    .footer-logo img {
+      height: 32px;
+      opacity: 0.7;
+    }
+    .footer-credit {
+      margin-top: 16px;
+      color: rgba(255,255,255,0.35);
+      font-size: 13px;
+    }
+    .footer-credit a {
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .footer-credit a:hover { color: rgba(255,255,255,0.8); }
+    .footer-credit .fb-sm {
+      width: 13px; height: 13px;
+      display: inline-block;
+      opacity: 0.6;
+      vertical-align: middle;
+    }
+
+    a { color: #a78bfa; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    strong { color: rgba(255,255,255,0.9); }
+  </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="header">
+  <div class="badge">
+    <span class="dot"></span>
+    מדריך טכני מאת
+    <a href="https://www.facebook.com/lior.levi26" target="_blank" rel="noopener noreferrer">
+      <svg class="fb-icon" viewBox="0 0 24 24" fill="rgba(66,103,178,0.9)"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+      Lior Levi
+    </a>
+  </div>
+  <h1>חיבור Base44 לשליחת מיילים דרך Microsoft 365</h1>
+  <p>פתרון לשגיאת <code>550 5.7.708</code> בשליחת מיילים מאפליקציית Base44 דרך תיבת דואר עסקית ב-Microsoft 365</p>
+</div>
+
+<div class="content">
+
+  <!-- מבוא קישורי -->
+  <div class="card">
+    <h2><span class="num">🔗</span> קצת על קישורי</h2>
+    <p><a href="https://kishury.com" target="_blank"><strong>קישורי</strong></a> היא מערכת Link-in-Bio בעברית — הראשונה שנבנתה מהיסוד עם תמיכה מלאה ב-RTL, עיצוב מקצועי, ופיצ'רים ייחודיים לשוק הישראלי. המערכת בנויה על פלטפורמת Base44, ומדריך זה מתעד את תהליך חיבור תיבת הדואר העסקית שלנו ב-Microsoft 365 לשליחת מיילים מהאפליקציה.</p>
+    <p><strong>המערכת כרגע בבטא</strong> — אם מעניין אתכם לנסות, <a href="https://www.facebook.com/lior.levi26" target="_blank">דברו איתי</a>.</p>
+  </div>
+
+  <!-- הבעיה -->
+  <div class="card">
+    <h2><span class="num">!</span> הבעיה</h2>
+    <p>חיברתם את קונקטור ה-Outlook של Base44 לתיבת דואר עסקית ב-Microsoft 365. שליחת מיילים מהאפליקציה נכשלת — מקבלים הודעת NDR (Non-Delivery Report) עם השגיאה:</p>
+    <div class="error-block">
+      <code>550 5.7.708 Service unavailable. Access denied, traffic not accepted from this IP. AS(7910)</code>
+    </div>
+
+    <div class="img-placeholder">
+      <img src="screenshots/1-ndr.png" alt="הודעת NDR שמתקבלת באאוטלוק — Delivery has failed">
+    </div>
+
+    <p>המייל יוצא מהתיבה (נראה ב-Sent Items באאוטלוק), אבל <strong>נדחה ע"י Gmail</strong> ושרתי דואר אחרים. שליחה ידנית מאאוטלוק — עובדת. הבעיה מתרחשת רק כששולחים מתוך האפליקציה שלכם ב-Base44, דרך Backend Function שמשתמשת בקונקטור ה-Outlook.</p>
+  </div>
+
+  <!-- מה הדוקס אומר vs מה שבאמת פתר -->
+  <div class="card" style="border-color: rgba(251,191,36,0.3);">
+    <h2><span class="num">?</span> מה אומרת Microsoft — ומה באמת פותר</h2>
+
+    <h3>מה כתוב בדוקומנטציה הרשמית</h3>
+    <p>לפי <a href="https://support.microsoft.com/en-us/topic/ndr-error-codes-550-5-7-703-550-5-7-705-550-5-7-708-and-550-5-7-750-f5675801-1846-4d1c-9599-5b4e26a9175d" target="_blank">הדוקומנטציה של Microsoft</a>:</p>
+
+    <div class="callout callout-info">
+      <span class="icon">📄</span>
+      <p><em>"This NDR is generated if you send an email message from an IP address that has a low reputation. The issue is more likely to affect new customers, such as those who have a Microsoft 365 trial subscription."</em><br><br>
+      ההמלצה: לפנות לתמיכה של Microsoft לבקשת IP address exception, ולהקצות רישיונות Exchange Online.</p>
+    </div>
+
+    <div class="img-placeholder">
+      <img src="screenshots/2-ms-docs.png" alt="הדוקומנטציה הרשמית של Microsoft לשגיאה 550 5.7.708">
+    </div>
+
+    <h3>הפער: מה באמת פתר את הבעיה</h3>
+    <p>בפועל, הבעיה <strong>לא נפתרה</strong> ע"י פנייה לתמיכה, שינוי מ-Trial לרישיון בתשלום, או עדכון רשומות DNS. כל אלה שלבים חשובים — אבל לא הם פתרו את השגיאה.</p>
+    <p>מה שפתר את הבעיה היה הגדרה ספציפית בקונקטורים של <span dir="ltr">Exchange Admin Center</span> — סימון האפשרות <strong dir="ltr">"Retain internal Exchange email headers"</strong>.</p>
+
+    <h3>למה זה קורה בפועל</h3>
+    <p>כאשר Base44 שולח מייל דרך ה-Outlook connector (Graph API), Exchange מתייחס להודעה כ<strong>"חיצונית"</strong> ומנתב אותה דרך ה-High Risk Delivery Pool — בלי חתימת DKIM. כשמסמנים "Retain internal Exchange email headers" בקונקטור, Exchange מתייחס למייל כ<strong>פנימי</strong>, מנתב אותו דרך ה-Normal Pool, וחותם אותו עם DKIM.</p>
+
+    <p>השוואת headers בין שליחה מאאוטלוק לשליחה מ-Base44 אישרה את זה:</p>
+    <table>
+      <tr><th>פרמטר</th><th>מאאוטלוק (עובד)</th><th>מ-Base44 (לפני הפתרון)</th></tr>
+      <tr><td>DKIM</td><td><code style="color: #86efac;">pass</code></td><td><code style="color: #fca5a5;">none (not signed)</code></td></tr>
+      <tr><td>Outbound Pool</td><td>Normal</td><td>High Risk</td></tr>
+      <tr><td>Gmail</td><td>התקבל</td><td>נדחה (550 5.7.708)</td></tr>
+    </table>
+  </div>
+
+  <!-- דרישות -->
+  <div class="card">
+    <h2><span class="num">✓</span> דרישות מוקדמות</h2>
+    <ul>
+      <li><strong>מנוי Microsoft 365 עם רישיון Exchange בתשלום</strong> — עדיף לא Trial</li>
+      <li>דומיין מותאם מחובר לטננט (לדוגמה: <code>yourdomain.com</code>)</li>
+      <li>תיבת דואר פעילה עם רישיון (לדוגמה: <code>hello@yourdomain.com</code>)</li>
+      <li>רשומות DNS תקינות: MX, SPF, DKIM, DMARC</li>
+      <li>חשבון Base44 עם Builder plan ומעלה</li>
+    </ul>
+  </div>
+
+  <!-- שלב 1: DNS -->
+  <div class="card">
+    <h2><span class="num">1</span> ודאו רשומות DNS תקינות</h2>
+    <p>אם הקמתם טננט חדש ובאשף ההגדרות הראשוני נתתם ל-365 להתחבר לספק הדומיין (IONOS, Cloudflare, GoDaddy וכו') — <strong>הרשומות נוצרו אוטומטית</strong>. אם מחברים לטננט 365 עסקי קיים — ככל הנראה הרשומות כבר עובדות.</p>
+
+    <p>בכל מקרה, ודאו שהרשומות הבאות קיימות ותקינות:</p>
+    <ul>
+      <li><strong>MX</strong> — מנתב מיילים נכנסים לטננט שלכם</li>
+      <li><strong>SPF</strong> — מגדיר מי מורשה לשלוח מייל בשם הדומיין</li>
+      <li><strong>DKIM</strong> — חתימה דיגיטלית שמאמתת שההודעה לא שונתה</li>
+      <li><strong>DMARC</strong> — מדיניות שמגדירה מה לעשות עם מיילים שנכשלים ב-SPF/DKIM</li>
+    </ul>
+
+    <h3>בדיקה</h3>
+    <p>היכנסו ל-<a href="https://mxtoolbox.com/SuperTool.aspx" target="_blank">MXToolbox SuperTool</a> ובדקו:</p>
+    <ul>
+      <li><strong>MX Lookup</strong> → <code>yourdomain.com</code></li>
+      <li><strong>SPF Lookup</strong> → <code>yourdomain.com</code></li>
+      <li><strong>DKIM Lookup</strong> → <code>yourdomain.com:selector1</code> (חובה לציין selector!)</li>
+    </ul>
+
+    <h3>הבנת רשומת SPF</h3>
+    <p>רשומת SPF מגדירה אילו שרתים מורשים לשלוח מייל בשם הדומיין שלכם. הנה פירוט:</p>
+
+    <pre><code>v=spf1 include:spf.protection.outlook.com ip4:216.24.57.1 -all</code></pre>
+
+    <table class="spf-breakdown">
+      <tr><th>רכיב</th><th>משמעות</th></tr>
+      <tr><td><code>v=spf1</code></td><td>גרסת הפרוטוקול — תמיד spf1</td></tr>
+      <tr><td><code>include:spf.protection.outlook.com</code></td><td>מרשה ל-Microsoft 365 לשלוח מייל בשם הדומיין</td></tr>
+      <tr><td><code>ip4:216.24.57.1</code></td><td>מרשה לכתובת ה-IP של Base44 לשלוח מייל בשם הדומיין (מומלץ)</td></tr>
+      <tr><td><code>-all</code></td><td>Hard Fail — כל שרת אחר שינסה לשלוח בשם הדומיין יידחה</td></tr>
+    </table>
+
+    <div class="callout callout-info">
+      <span class="icon">💡</span>
+      <p>הוספת <code>ip4:216.24.57.1</code> (כתובת ה-IP של Base44) ל-SPF מומלצת כשכבה נוספת של אימות. ייתכן שספק הדומיין שלכם כבר הוסיף <code>include</code> משלו — זה גם בסדר.</p>
+    </div>
+  </div>
+
+  <!-- שלב 2: DKIM -->
+  <div class="card">
+    <h2><span class="num">2</span> הפעלת DKIM ב-Microsoft Defender</h2>
+    <p>DKIM חותם דיגיטלית כל מייל שיוצא מהטננט. בלי זה, מיילים ייחשבו חשודים ועלולים להידחות.</p>
+    <ol>
+      <li>היכנסו עם <strong>Global Admin</strong> ל-<a href="https://security.microsoft.com" target="_blank">security.microsoft.com</a></li>
+      <li><strong>Email & Collaboration → Policies & Rules → Threat policies → Email authentication settings</strong></li>
+      <li>לחצו על טאב <strong>DKIM</strong></li>
+      <li>בחרו את הדומיין שלכם</li>
+      <li>הפעילו את ה-toggle</li>
+      <li>ודאו שהסטטוס: <strong>Enabled + Valid</strong></li>
+    </ol>
+
+    <p>Microsoft ידרוש שתי רשומות CNAME ב-DNS (<code>selector1._domainkey</code> ו-<code>selector2._domainkey</code>). אם הדומיין הוגדר אוטומטית באשף הראשוני — הרשומות כבר שם.</p>
+
+    <div class="img-placeholder">
+      <img src="screenshots/3-dkim-defender.png" alt="מסך Email authentication settings — רשימת הדומיינים">
+    </div>
+    <div class="img-placeholder">
+      <img src="screenshots/3-dkim-defender-tab.png" alt="טאב DKIM — הדומיין מופעל עם סטטוס Enabled + Valid">
+    </div>
+  </div>
+
+  <!-- שלב 3: Base44 Outlook Connector -->
+  <div class="card">
+    <h2><span class="num">3</span> ודאו שקונקטור ה-Outlook מחובר נכון</h2>
+    <p>אם הגעתם למדריך הזה — סביר שכבר חיברתם את קונקטור ה-Outlook ב-Base44 ונתקלתם בשגיאה. בשלב הזה, ודאו שהחיבור בוצע נכון:</p>
+
+    <h3>איך מחברים (אם עדיין לא)</h3>
+    <ol>
+      <li>בדשבורד Base44 → <strong>Integrations</strong> → <strong>Outlook</strong> → <strong>Use</strong></li>
+      <li>התחברו תחילה עם <strong>Global Admin</strong> של הטננט לאישור ההרשאות הנדרשות</li>
+      <li>לאחר האישור, לחצו על שלוש הנקודות → <strong>Switch Account</strong></li>
+      <li>התחברו עם חשבון תיבת המייל (<code>hello@yourdomain.com</code>)</li>
+    </ol>
+
+    <div class="img-placeholder">
+      <img src="screenshots/4-base44-integrations.png" alt="דף Integrations ב-Base44 — קונקטור Outlook מחובר">
+    </div>
+
+    <div class="callout callout-info">
+      <span class="icon">💡</span>
+      <p><strong>טיפ לניהול נכון של הטננט:</strong> אפשר להשתמש ביוזר אחד שהוא גם Global Admin וגם תיבת המייל — אבל העדיפות היא להפריד. יוזר Admin נפרד (ללא רישיון ותיבת מייל) שמשמש רק לניהול הטננט, ויוזר נוסף עם רישיון שמשמש כתיבת המייל של האפליקציה. ככה אם חשבון המייל חלילה נפרץ — אין לתוקף גישת Admin לטננט.<br><br>
+      זו גם הסיבה שכתוב להתחבר קודם עם Global Admin (לאישור הרשאות) ואז לעשות Switch Account ליוזר של תיבת המייל — כל אחד ממלא את התפקיד שלו.</p>
+    </div>
+
+    <h3>מה לבדוק אם כבר חיברתם</h3>
+
+    <div class="callout callout-danger">
+      <span class="icon">🚫</span>
+      <p><strong>חשוב:</strong> ודאו שכתובת המייל שחיברתם <strong>לא מוגדרת</strong> גם ב-Dashboard → Domains → Email domains. אם היא מופיעה שם — מחקו אותה. כשהיא מוגדרת בשני המקומות, זה עלול לגרום להתנגשות בשליחה.</p>
+    </div>
+
+    <div class="img-placeholder">
+      <img src="screenshots/5-base44-domains.png" alt="דף Domains ב-Base44 — Email domain מוגדר כברירת מחדל של Base44, ללא כתובת מותאמת">
+    </div>
+  </div>
+
+  <!-- שלב 4: Exchange Connectors — הפתרון! -->
+  <div class="card" style="border-color: rgba(74,222,128,0.3);">
+    <h2><span class="num" style="background: linear-gradient(to bottom right, #059669, #064e3b);">4</span> יצירת קונקטורים ב-Exchange — הפתרון!</h2>
+
+    <div class="callout callout-success">
+      <span class="icon">⭐</span>
+      <p><strong>זה השלב הקריטי שפותר את הבעיה.</strong> ללא הגדרה זו, מיילים שנשלחים מ-Base44 ינותבו דרך ה-High Risk Pool של Microsoft, לא יקבלו חתימת DKIM, ויידחו.</p>
+    </div>
+
+    <h3>היכנסו ל-Exchange Admin Center</h3>
+    <p>היכנסו עם <strong>Global Admin</strong> ל-<a href="https://admin.exchange.microsoft.com" target="_blank">admin.exchange.microsoft.com</a> → <strong>Mail flow</strong> → <strong>Connectors</strong></p>
+
+    <h3>קונקטור 1: "Base44" (אימות לפי IP)</h3>
+    <ol>
+      <li><strong>Add a connector</strong></li>
+      <li>From: <strong>Your organization's email server</strong> → To: <strong>Office 365</strong></li>
+      <li>Name: <code>Base44</code></li>
+      <li>Authenticating sent email: <strong>By verifying that the IP address</strong> matches: <span class="copyable"><code>216.24.57.1</code><button class="copy-btn" onclick="copyText('216.24.57.1', this)">העתק</button></span></li>
+      <li>סמנו: ✅ <strong>Turn it on</strong></li>
+      <li>סמנו: ✅ <strong>Retain internal Exchange email headers</strong></li>
+      <li>שמרו</li>
+    </ol>
+
+    <div class="img-placeholder">
+      <img src="screenshots/6-exchange-connector-ip-tab.png" alt="קונקטור Base44 — רשימת הקונקטורים ב-Exchange">
+    </div>
+    <div class="img-placeholder">
+      <img src="screenshots/6-exchange-connector-ip-tab-connector-addip.png" alt="קונקטור Base44 — אימות לפי IP עם 216.24.57.1">
+    </div>
+    <div class="img-placeholder">
+      <img src="screenshots/6-exchange-connector-ip-tab-connector-retain.png" alt="קונקטור Base44 — Retain internal Exchange email headers מסומן">
+    </div>
+
+    <h3>קונקטור 2: "Base44 URL" (אימות לפי TLS Certificate)</h3>
+    <ol>
+      <li><strong>Add a connector</strong></li>
+      <li>From: <strong>Your organization's email server</strong> → To: <strong>Office 365</strong></li>
+      <li>Name: <code>Base44 URL</code></li>
+      <li>Authenticating sent email: <strong>By verifying that the subject name on the certificate</strong> matches: <span class="copyable"><code>base44.onrender.com</code><button class="copy-btn" onclick="copyText('base44.onrender.com', this)">העתק</button></span></li>
+      <li>סמנו: ✅ <strong>Turn it on</strong></li>
+      <li>סמנו: ✅ <strong>Retain internal Exchange email headers</strong></li>
+      <li>שמרו</li>
+    </ol>
+
+    <div class="img-placeholder">
+      <img src="screenshots/7-exchange-connector-url-tab.png" alt="קונקטור Base44 URL — רשימת הקונקטורים ב-Exchange">
+    </div>
+    <div class="img-placeholder">
+      <img src="screenshots/7-exchange-connector-url-addurl.png" alt="קונקטור Base44 URL — אימות לפי certificate עם base44.onrender.com">
+    </div>
+    <div class="img-placeholder">
+      <img src="screenshots/7-exchange-connector-url-retain.png" alt="קונקטור Base44 URL — Retain internal Exchange email headers מסומן">
+    </div>
+
+    <h3>למה שני קונקטורים?</h3>
+    <ul>
+      <li><strong>Base44 (IP)</strong> — מזהה מיילים שמגיעים מה-IP הסטטי של Base44</li>
+      <li><strong>Base44 URL (Certificate)</strong> — מזהה מיילים שמגיעים משרת Base44 לפי ה-TLS Certificate</li>
+    </ul>
+    <p>שני הקונקטורים מכסים תרחישים שונים של שליחה.</p>
+
+    <div class="callout callout-success">
+      <span class="icon">🔑</span>
+      <p><strong>ההגדרה הקריטית: "Retain internal Exchange email headers"</strong><br>
+      זה מה שגורם ל-Exchange להתייחס למיילים מ-Base44 כ<strong>פנימיים</strong>. בלי זה, Exchange מתייחס אליהם כ"חיצוניים" ומנתב אותם דרך ה-High Risk Pool — בלי חתימת DKIM. עם ההגדרה הזו — הם מטופלים כמו מייל פנימי רגיל, עוברים דרך ה-Normal Delivery Pool, ומקבלים חתימת DKIM.</p>
+    </div>
+  </div>
+
+  <!-- שלב 5: בדיקה -->
+  <div class="card">
+    <h2><span class="num">5</span> בדיקה</h2>
+    <ol>
+      <li>שלחו מייל טסט מ-Base44 לכתובת Gmail</li>
+      <li>בדקו שהמייל הגיע (Inbox או Spam) — <strong>אם הגיע, הפתרון עובד!</strong></li>
+    </ol>
+    <p>אם המייל הגיע ל-Spam — זה נורמלי לדומיין חדש, סמנו "Not spam". המוניטין נבנה עם הזמן.</p>
+
+    <h3>בדיקה מתקדמת (אופציונלי)</h3>
+    <p>לוידוא שכל שכבות האימות עובדות, פתחו את ה-headers ב-Gmail: שלוש נקודות → <strong>"Show original"</strong> ובדקו:</p>
+
+    <table>
+      <tr><th>בדיקה</th><th>תוצאה נדרשת</th></tr>
+      <tr><td>SPF</td><td><code style="color: #86efac;">PASS</code></td></tr>
+      <tr><td>DKIM</td><td><code style="color: #86efac;">PASS</code></td></tr>
+      <tr><td>DMARC</td><td><code style="color: #86efac;">PASS</code></td></tr>
+    </table>
+
+  </div>
+
+  <!-- פתרון בעיות -->
+  <div class="card">
+    <h2><span class="num">🔧</span> פתרון בעיות</h2>
+
+    <h3>עדיין מקבלים 550 5.7.708?</h3>
+    <ul>
+      <li>ודאו ש-<strong>Retain internal Exchange email headers</strong> מסומן <strong>בשני הקונקטורים</strong></li>
+      <li>ודאו שה-DKIM מופעל ב-Defender</li>
+      <li>ודאו שהמנוי בתשלום (לא Trial)</li>
+      <li>אם שום דבר לא עוזר — נסו לפנות לתמיכה של Microsoft Support</li>
+      <li>מוזמנים גם לפנות אליי: <a href="https://www.facebook.com/lior.levi26" target="_blank">Lior Levi בפייסבוק</a></li>
+    </ul>
+
+    <h3><code>dkim=none (message not signed)</code>?</h3>
+    <ul>
+      <li>בדקו שה-DKIM מופעל ב-<a href="https://security.microsoft.com" target="_blank">security.microsoft.com</a> → Email authentication settings → DKIM</li>
+      <li>בדקו שרשומות CNAME של <code>selector1</code> ו-<code>selector2</code> קיימות ב-DNS</li>
+      <li>ודאו שהקונקטורים ב-Exchange מוגדרים עם <strong>Retain internal Exchange email headers</strong> — זו בדרך כלל הסיבה</li>
+    </ul>
+
+    <h3>מיילים לא מגיעים מ-Outlook connector?</h3>
+    <ul>
+      <li>ודאו שכתובת המייל שחיברתם <strong>לא מוגדרת</strong> גם ב-Dashboard → Domains → Email domains</li>
+      <li>אם היא מופיעה בשני המקומות, זה עלול לגרום להתנגשות</li>
+    </ul>
+  </div>
+
+  <!-- סיכום -->
+  <div class="card">
+    <h2><span class="num">📋</span> סיכום</h2>
+    <table class="summary-table">
+      <tr><td>שלב 1</td><td>DNS: ודאו שרשומות MX, SPF, DKIM, DMARC תקינות</td></tr>
+      <tr><td>שלב 2</td><td>DKIM: הפעלה ב-Microsoft Defender → Email authentication settings</td></tr>
+      <tr><td>שלב 3</td><td>Base44: חיבור Outlook connector (בלי Email Domain!)</td></tr>
+      <tr><td>שלב 4</td><td>Exchange: שני קונקטורים עם <strong>Retain internal Exchange email headers</strong></td></tr>
+      <tr><td>שלב 5</td><td>טסט: שליחה ובדיקת headers ב-Gmail</td></tr>
+    </table>
+  </div>
+
+</div>
+
+<div class="footer">
+  <div class="footer-logo">
+    <a href="https://kishury.com" target="_blank">
+      <img src="logo.png" alt="קישורי" style="height: 80px; opacity: 0.7;">
+    </a>
+  </div>
+  <p><a href="https://kishury.com">קישורי</a> — מערכת Link-in-Bio בעברית</p>
+  <p class="footer-credit">
+    נבנה ב💜 ע"י
+    <a href="https://www.facebook.com/lior.levi26" target="_blank" rel="noopener noreferrer">
+      <svg class="fb-sm" viewBox="0 0 24 24" fill="rgba(66,103,178,0.7)"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+      Lior Levi
+    </a>
+  </p>
+  <p style="margin-top: 12px;">הפתרון נמצא בשיתוף עם Microsoft Support — ומציג פער בין הדוקומנטציה הרשמית לבין מה שבאמת פותר את הבעיה.</p>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<script>
+// Add click hints and click handlers to all images
+document.querySelectorAll('.img-placeholder img').forEach(img => {
+  // Add click hint
+  const hint = document.createElement('span');
+  hint.className = 'click-hint';
+  hint.textContent = 'לחצו להגדלה';
+  img.parentElement.appendChild(hint);
+
+  // Click to open lightbox
+  img.parentElement.addEventListener('click', () => {
+    document.getElementById('lightbox-img').src = img.src;
+    document.getElementById('lightbox').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  });
+});
+
+function copyText(text, btn) {
+  event.stopPropagation();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'הועתק!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'העתק';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// Close on Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeLightbox();
+});
+</script>
+
+</body>
+</html>
